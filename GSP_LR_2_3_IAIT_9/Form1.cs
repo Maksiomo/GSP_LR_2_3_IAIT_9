@@ -10,6 +10,7 @@ namespace GSP_LR_2_3_IAIT_9
         Graphics g;
         Pen DrawPen = new Pen(Color.Black, 1);
         int FillType = 0; // По умолчанию заливка построчная 
+        bool drawLine = false; // Отрисовывать граничные линии
         List<Point> VertexList = new List<Point>(); // Список вершин многоугольника
         public Form1()
         {
@@ -204,7 +205,7 @@ namespace GSP_LR_2_3_IAIT_9
                 VertexList.Add(new Point() { X = e.X, Y = e.Y });
                 g.DrawEllipse(DrawPen, e.X - 2, e.Y - 2, 5, 5);
                 int pointCount = VertexList.Count - 1;
-                if (pointCount > 0) {
+                if (pointCount > 0 && drawLine) {
                     g.DrawLine(DrawPen, VertexList[pointCount - 1], VertexList[pointCount]);
                 }
             } else if (e.Button == MouseButtons.Right)
@@ -215,8 +216,11 @@ namespace GSP_LR_2_3_IAIT_9
                     MessageBox.Show("Введено слишком мало точек для существования многоугольника, отрисовка невозможна");
                     return;
                 }
-                g.DrawLine(DrawPen, VertexList[pointCount - 1], VertexList[pointCount]);
-                g.DrawLine(DrawPen, VertexList[pointCount], VertexList[0]); // соединяем первую и последнюю точки
+                if(drawLine)
+                {
+                    g.DrawLine(DrawPen, VertexList[pointCount - 1], VertexList[pointCount]);
+                    g.DrawLine(DrawPen, VertexList[pointCount], VertexList[0]); // соединяем первую и последнюю точки
+                }
                 // Заливка, в зависимости от типа
                 if (FillType == 0)
                 {
@@ -230,5 +234,9 @@ namespace GSP_LR_2_3_IAIT_9
             }
         }
 
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            drawLine = !drawLine;
+        }
     }
 }
