@@ -9,7 +9,7 @@ namespace GSP_LR_2_3_IAIT_9
     {
         Graphics g;
         Pen DrawPen = new Pen(Color.Black, 1);
-        int FillType = 0; // По умолчанию заливка построчная 
+        int FillType = 0; // По умолчанию заливка неориентированная 
         bool drawLine = false; // Отрисовывать граничные линии
         List<Point> VertexList = new List<Point>(); // Список вершин многоугольника
         public Form1()
@@ -53,8 +53,8 @@ namespace GSP_LR_2_3_IAIT_9
 
         /**
          * Метод выполняющий заливку по ориентации
-         * Если точки проставлялись по часовой стрелке -> закрашена внутренняя часть фигуры
-         * Если против часовой -> внешняя
+         * Если точки проставлялись по часовой стрелке -> закрашена внешняя часть фигуры
+         * Если против часовой -> внутреняя
          */
         private void FillByOrient()
         {
@@ -70,8 +70,8 @@ namespace GSP_LR_2_3_IAIT_9
             }
             ymin = pmin.Y < ymin ? ymin : pmin.Y;
             ymax = pmax.Y > ymax ? ymax : pmax.Y;
-            // получаем индекс вершины с наибольшим Y и её соседей (учитвая граничные случаи)
-            int j = VertexList.IndexOf(pmax);
+            // получаем индекс вершины с наименьшим Y и её соседей (учитвая граничные случаи)
+            int j = VertexList.IndexOf(pmin);
             int jl = j == 0 ? VertexList.Count - 1 : j - 1;
             int jr = j == VertexList.Count - 1 ? 0 : j + 1;
 
@@ -84,8 +84,8 @@ namespace GSP_LR_2_3_IAIT_9
                 - (VertexList[jl].X * VertexList[jr].Y)
             ) / 2;
             // Направление обхода
-            bool CW = s < 0;
-            if (CW) // Если обход против часовой, заполняем строки от 0 до ymin
+            bool CW = s > 0;
+            if (CW) // Если обход по часовой, заполняем строки от 0 до ymin
             {
                 for (int y = 0; y < ymin; y++)
                 {
@@ -108,7 +108,7 @@ namespace GSP_LR_2_3_IAIT_9
                     {
                         // формула определения x координаты пересечения двух отрезков, заданных вершинами
                         double x = VertexList[i].X + ((VertexList[k].X - VertexList[i].X) * (y - VertexList[i].Y)) / (VertexList[k].Y - VertexList[i].Y);
-                        if (VertexList[k].Y - VertexList[i].Y > 0)
+                        if (VertexList[k].Y - VertexList[i].Y < 0)
                         {
                             Xr.Add((int)x);
                         } else
@@ -117,7 +117,7 @@ namespace GSP_LR_2_3_IAIT_9
                         }
                     }
                 }
-                if (CW) // Если обход против часовой, добавляем краевые точки
+                if (CW) // Если обход по часовой, добавляем краевые точки
                 {
                     Xl.Add(0);
                     Xr.Add(pictureBox1.Width);
@@ -133,7 +133,7 @@ namespace GSP_LR_2_3_IAIT_9
                     } 
                 }
             }
-            if (CW) // Если обход против часовой, заполняем строки от ymax до границы полотна
+            if (CW) // Если обход по часовой, заполняем строки от ymax до границы полотна
             {
                 for (int y = ymax; y < pictureBox1.Height; y++)
                 {

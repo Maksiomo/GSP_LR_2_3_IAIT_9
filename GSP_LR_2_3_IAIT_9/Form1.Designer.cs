@@ -90,7 +90,7 @@ namespace GSP_LR_2_3_IAIT_9
             this.comboBox2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Items.AddRange(new object[] {
-            "Построчный",
+            "Неориентированный",
             "Ориентированный"});
             this.comboBox2.Location = new System.Drawing.Point(286, 8);
             this.comboBox2.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
