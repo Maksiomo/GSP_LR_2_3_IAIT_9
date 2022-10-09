@@ -27,6 +27,7 @@ namespace GSP_LR_2_3_IAIT_9
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // Выбор цвета после изменения значения comboBox1
             switch (comboBox1.SelectedIndex)
             {
                 case 0:
@@ -45,11 +46,18 @@ namespace GSP_LR_2_3_IAIT_9
         }
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
+            // Выбор способа заливки, после изменения значения comboBox2
             FillType = comboBox2.SelectedIndex;
         }
 
+        /**
+         * Метод выполняющий заливку по ориентации
+         * Если точки проставлялись по часовой стрелке -> закрашена внутренняя часть фигуры
+         * Если против часовой -> внешняя
+         */
         private void FillByOrient()
         {
+            // Определяем наивысшую и наинизшую по Y координате точки
             Point pmin = VertexList[0];
             Point pmax = VertexList[0];
             int ymin = 0;
@@ -61,10 +69,12 @@ namespace GSP_LR_2_3_IAIT_9
             }
             ymin = pmin.Y < ymin ? ymin : pmin.Y;
             ymax = pmax.Y > ymax ? ymax : pmax.Y;
-            // получаем индекс наибольшего элемента
+            // получаем индекс вершины с наибольшим Y и её соседей (учитвая граничные случаи)
             int j = VertexList.IndexOf(pmax);
             int jl = j == 0 ? VertexList.Count - 1 : j - 1;
             int jr = j == VertexList.Count - 1 ? 0 : j + 1;
+
+            // Вычисляем площадь треугольника, заданного вершиной с наибольшим Y и её соседями
             double s = ((VertexList[jl].X * VertexList[j].Y)
                 + (VertexList[jl].Y * VertexList[jr].X)
                 + (VertexList[j].X * VertexList[jr].Y)
@@ -72,23 +82,27 @@ namespace GSP_LR_2_3_IAIT_9
                 - (VertexList[jl].Y * VertexList[j].X)
                 - (VertexList[jl].X * VertexList[jr].Y)
             ) / 2;
+            // Направление обхода
             bool CW = s < 0;
-            if (CW)
+            if (CW) // Если обход против часовой, заполняем строки от 0 до ymin
             {
                 for (int y = 0; y < ymin; y++)
                 {
                     g.DrawLine(DrawPen, new Point(0, y), new Point(pictureBox1.Width, y));
                 }
             }
+            // списки x координат точек пересечения
             List<int> Xr = new List<int>();
             List<int> Xl = new List<int>();
             for (int y = ymin; y <= ymax; y++)
             {
+                // очищаем списки координат
                 Xr.Clear();
                 Xl.Clear();
                 for (int i = 0; i < VertexList.Count; i++)
                 {
                     int k = i < VertexList.Count - 1 ? i + 1 : 0;
+                    // обработка граничных случаев
                     if (((VertexList[i].Y < y) && (VertexList[k].Y >= y)) || ((VertexList[i].Y >= y) && (VertexList[k].Y < y)))
                     {
                         // формула определения x координаты пересечения двух отрезков, заданных вершинами
@@ -102,13 +116,14 @@ namespace GSP_LR_2_3_IAIT_9
                         }
                     }
                 }
-                if (CW)
+                if (CW) // Если обход против часовой, добавляем краевые точки
                 {
                     Xl.Add(0);
                     Xr.Add(pictureBox1.Width);
                 }
                 Xl.Sort((a, b) => a.CompareTo(b)); // сортировка по возростанию
                 Xr.Sort((a, b) => a.CompareTo(b)); // сортировка по возростанию
+                // отрисовка
                 for (int id = 0; id < Xl.Count && id < Xr.Count; id++)
                 {
                     if (Xl[id] < Xr[id])
@@ -117,7 +132,7 @@ namespace GSP_LR_2_3_IAIT_9
                     } 
                 }
             }
-            if (CW)
+            if (CW) // Если обход против часовой, заполняем строки от ymax до границы полотна
             {
                 for (int y = ymax; y < pictureBox1.Height; y++)
                 {
@@ -126,8 +141,12 @@ namespace GSP_LR_2_3_IAIT_9
             }
         }
 
+        /**
+         * Метод выполняющий заливку по прямым
+         */
         private void FillByLine()
         {
+            // Определяем наивысшую и наинизшую по Y координате точки
             Point pmin = VertexList[0];
             Point pmax = VertexList[0];
             int ymin = 0;
@@ -163,11 +182,21 @@ namespace GSP_LR_2_3_IAIT_9
             }
         }
 
+        /**
+         * Метод реинициализирующий полотно, при изменении размера окна
+         */
         private void Form1_Resize(object sender, EventArgs e)
         {
             g = pictureBox1.CreateGraphics(); //реинициализация графики
         }
 
+        /**
+         * Рисование на полотне
+         * На нажатие ЛКМ - ставится точка-вершина многоугольника
+         * На нажатие ПКМ - попытка заливки получившейся по точкам фигуры
+         * Если вершин < 3, заливка происходить не будет
+         * После заливки, массив точек очищается
+         */
         private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -188,6 +217,7 @@ namespace GSP_LR_2_3_IAIT_9
                 }
                 g.DrawLine(DrawPen, VertexList[pointCount - 1], VertexList[pointCount]);
                 g.DrawLine(DrawPen, VertexList[pointCount], VertexList[0]); // соединяем первую и последнюю точки
+                // Заливка, в зависимости от типа
                 if (FillType == 0)
                 {
                     FillByLine();
@@ -195,6 +225,7 @@ namespace GSP_LR_2_3_IAIT_9
                 {
                     FillByOrient();
                 }
+                // Чистим массив точек после заливки
                 VertexList.Clear();
             }
         }
